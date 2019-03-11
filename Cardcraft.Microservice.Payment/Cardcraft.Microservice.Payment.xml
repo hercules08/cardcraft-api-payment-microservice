@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Cardcraft.Microservice.Payment</name>
+    </assembly>
+    <members>
+        <member name="M:Cardcraft.Microservice.Payment.Controllers.PaymentController.GetBillingAmounts">
+            <summary>
+            Gets the Billing Amounts and Credit Count
+            </summary>
+            <returns>List of Billing Ids, Billing amount and credits that user will</returns>
+        </member>
+        <member name="M:Cardcraft.Microservice.Payment.Controllers.PaymentController.PurchaseCredits(Cardcraft.Microservice.Payment.RequestModels.PurchaseCreditRequest)">
+            <summary>
+            Allows user to purchase credit
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
