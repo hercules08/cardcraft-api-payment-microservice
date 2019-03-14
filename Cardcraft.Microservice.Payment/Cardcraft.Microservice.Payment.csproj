@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -6,9 +6,10 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <UserSecretsId>01481371-f957-4296-92b0-98c12382e4c2</UserSecretsId>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>obj\Debug\netcoreapp2.2\Cardcraft.Microservice.Payment\Cardcraft.Microservice.Payment.xml</DocumentationFile>
+  
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -89,5 +89,15 @@ namespace Cardcraft.Microservice.Payment.Controllers
 
             return BadRequest(new APIResponse(false, "unsuccessful_credit_add", "We were unable to add credits at the moment"));
         }
+
+        [HttpGet]
+        [Route("TestHealth")]
+        public ActionResult TestHealth(bool throwException)
+        {
+            if (throwException)
+                throw new Exception();
+
+            return Ok();
+        }
     }
 }
