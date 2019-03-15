@@ -1,5 +1,7 @@
-﻿using Cardcraft.Microservice.Payment.RequestModels;
+﻿using Cardcraft.Microservice.aCore;
+using Cardcraft.Microservice.Payment.RequestModels;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,7 +19,7 @@ namespace Cardcraft.Microservice.Payment.Clients
             _configuration = configuration;
         }
 
-        public async Task<bool> UpdateUserCredits(UpdateUserCreditRequest request)
+        public async Task<IAPIResponse> UpdateUserCredits(UpdateUserCreditRequest request)
         {
             HttpResponseMessage response = null;
 
@@ -30,12 +32,19 @@ namespace Cardcraft.Microservice.Payment.Clients
 
             }
 
-            if(response != null && response.IsSuccessStatusCode)
+            if (response != null && response.IsSuccessStatusCode)
             {
-                return true;
-            }
 
-            return false;
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<APIResponse<UpdateUserCreditResponse>>(jsonString);
+                return apiResponse;
+            }
+            else
+            {
+                var jsonString = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonConvert.DeserializeObject<APIResponse>(jsonString);
+                return apiResponse;
+            }
         }
 
         private async Task<HttpResponseMessage> UpdateUserCreditsFromAccountService(UpdateUserCreditRequest request)

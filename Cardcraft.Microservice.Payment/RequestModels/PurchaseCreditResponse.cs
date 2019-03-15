@@ -1,14 +1,10 @@
 ﻿using Cardcraft.Microservice.aCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Cardcraft.Microservice.Payment.RequestModels
 {
-    public class PurchaseCreditResponse : APIResponse<int>
+    public class PurchaseCreditResponse : APIResponse<UpdateUserCreditResponse>
     {
-        public PurchaseCreditResponse(bool success, string apiStatus, string message, int data) 
+        public PurchaseCreditResponse(bool success, string apiStatus, string message, UpdateUserCreditResponse data) 
             : base(success, apiStatus, message, data)
         {
         }

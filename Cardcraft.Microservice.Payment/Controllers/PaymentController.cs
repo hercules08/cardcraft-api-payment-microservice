@@ -70,14 +70,21 @@ namespace Cardcraft.Microservice.Payment.Controllers
             try
             {
                 chargeResponse = service.Create(charge);
-                bool success = await _accountClient.UpdateUserCredits(new UpdateUserCreditRequest()
+
+                IAPIResponse updateUserCreditResponse = await _accountClient.UpdateUserCredits(new UpdateUserCreditRequest()
                 {
                     NumOfCreditsToAdd = billInfo.CreditCount,
                     UserProfileId = request.UserId
                 });
 
-                if (success)
-                    return Ok(new PurchaseCreditResponse(true, "successful_purchase", "Successfully added credits", billInfo.CreditCount));
+                if (updateUserCreditResponse.Success)
+                {
+                    APIResponse<UpdateUserCreditResponse> creditResponse = (APIResponse<UpdateUserCreditResponse>)updateUserCreditResponse;
+                    PurchaseCreditResponse purchaseCreditResponse = new PurchaseCreditResponse(true, "successful_purchase"
+                        , "Successfully added credits. Here are the total credits.", creditResponse.Data);
+
+                    return Ok(purchaseCreditResponse);
+                }
             }
             catch (StripeException ex)
             {
