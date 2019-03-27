@@ -1,20 +1,17 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
+FROM microsoft/dotnet:2.2-sdk AS build-env
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-FROM microsoft/dotnet:2.2-sdk AS build
-WORKDIR /src
-COPY ["../Cardcraft.Microservice.Payment/Cardcraft.Microservice.Payment.csproj", "../Cardcraft.Microservice.Payment/"]
-RUN dotnet restore "../Cardcraft.Microservice.Payment/Cardcraft.Microservice.Payment.csproj"
-COPY . .
-WORKDIR "/src/../Cardcraft.Microservice.Payment"
-RUN dotnet build "Cardcraft.Microservice.Payment.csproj" -c Release -o /app
+# Copy csproj and restore as distinct layers
+COPY *.csproj ./
+RUN dotnet restore
 
-FROM build AS publish
-RUN dotnet publish "Cardcraft.Microservice.Payment.csproj" -c Release -o /app
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o out
 
-FROM base AS final
+# Build runtime image
+FROM microsoft/dotnet:2.2-aspnetcore-runtime
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=build-env /app/out .
+ENV ASPNETCORE="Production"
 ENTRYPOINT ["dotnet", "Cardcraft.Microservice.Payment.dll"]
