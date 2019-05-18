@@ -1,31 +1,73 @@
 ﻿using Cardcraft.Microservice.Account.BusinessLogic.Interface;
+using Cardcraft.Microservice.aCore;
 using Cardcraft.Microservice.Payment.BusinessLogic;
 using Cardcraft.Microservice.Payment.Clients;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net;
+using System.Net.Security;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Cardcraft.Microservice.Payment
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        IConfiguration Configuration { get; }
+        IHostingEnvironment Environment { get; }
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            Environment = env;
         }
-
-        public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddMvcCore(
+                config =>
+                {
+                    config.Filters.Add(typeof(GlobalExceptionFilter));
+                })
+                .AddAuthorization()
+                .AddJsonFormatters()
+                .AddApiExplorer();
+
+            services.AddAuthentication("Bearer")
+                .AddJwtBearer("Bearer", options =>
+                {
+                    options.Authority = Configuration["TOKEN_AUTHORITY"];
+                    options.Audience = Configuration["API_AUDIENCE"];
+                    if (Environment.IsDevelopment())
+                        options.RequireHttpsMetadata = false;
+                });
+
+            if (Environment.IsDevelopment())
+            {
+                //Accept all server certificate
+                ServicePointManager.ServerCertificateValidationCallback =
+                    delegate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+                    {
+                        return true;
+                    };
+            }
+
+            services.AddCors(options =>
+            {
+                // this defines a CORS policy called "default"
+                options.AddPolicy("default", policy =>
+                {
+                    policy.WithOrigins(Configuration["AllowedHosts"])
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -36,6 +78,21 @@ namespace Cardcraft.Microservice.Payment
                 var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
+
+                // Swagger 2.+ support
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { }},
+                };
+
+                c.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
+                c.AddSecurityRequirement(security);
             });
 
             services.AddScoped<IAccountClient, AccountClient>();
@@ -71,6 +128,8 @@ namespace Cardcraft.Microservice.Payment
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
             });
+
+            app.UseAuthentication();
             //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseMvc();

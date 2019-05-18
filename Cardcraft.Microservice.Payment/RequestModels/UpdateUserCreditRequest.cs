@@ -9,5 +9,6 @@ namespace Cardcraft.Microservice.Payment.RequestModels
     {
         public string UserProfileId { get; set; }
         public int NumOfCreditsToAdd { get; set; }
+        public string AccessToken { get; set; }
     }
 }

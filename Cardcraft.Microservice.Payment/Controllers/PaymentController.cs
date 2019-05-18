@@ -4,6 +4,7 @@ using Cardcraft.Microservice.Payment.Clients;
 using Cardcraft.Microservice.Payment.Model;
 using Cardcraft.Microservice.Payment.RequestModels;
 using Cardcraft.Microservice.Payment.Stubs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -15,6 +16,7 @@ namespace Cardcraft.Microservice.Payment.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PaymentController : ApiControllerBase
     {
         private static IConfiguration _configuration;
@@ -36,6 +38,7 @@ namespace Cardcraft.Microservice.Payment.Controllers
         /// <returns>List of Billing Ids, Billing amount and credits that user will</returns>
         [HttpGet]
         [Route("GetBillingAmounts")]
+        [AllowAnonymous]
         public ActionResult GetBillingAmounts()
         {
             return Ok(BillingsStub.BillingAmounts);
@@ -53,13 +56,11 @@ namespace Cardcraft.Microservice.Payment.Controllers
             BillingInfo billInfo =
                 BillingsStub.BillingAmounts.Find(x => x.Id == request.BillingAmountId);
 
-
-
             var charge = new ChargeCreateOptions
             {
                 Amount = Convert.ToInt32(billInfo.Cost * 100),
                 Currency = "usd",
-                Description = "Cardcraft Purchase " + request.UserId,
+                Description = "Cardcraft Purchase " + CONTEXT_USER,
                 SourceId = request.Token
             };
 
@@ -73,8 +74,9 @@ namespace Cardcraft.Microservice.Payment.Controllers
 
                 IAPIResponse updateUserCreditResponse = await _accountClient.UpdateUserCredits(new UpdateUserCreditRequest()
                 {
-                    NumOfCreditsToAdd = billInfo.CreditCount,
-                    UserProfileId = request.UserId
+                    UserProfileId = CONTEXT_USER,
+                    AccessToken = CONTEXT_TOKEN,
+                    NumOfCreditsToAdd = billInfo.CreditCount
                 });
 
                 if (updateUserCreditResponse.Success)
@@ -99,6 +101,7 @@ namespace Cardcraft.Microservice.Payment.Controllers
 
         [HttpGet]
         [Route("TestHealth")]
+        [AllowAnonymous]
         public ActionResult TestHealth(bool throwException)
         {
             if (throwException)

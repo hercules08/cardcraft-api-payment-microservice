@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
+using System.Security.Claims;
 
 namespace Cardcraft.Microservice.aCore
 {
@@ -28,6 +30,15 @@ namespace Cardcraft.Microservice.aCore
             //    StatusCode = System.Net.HttpStatusCode.ExpectationFailed
             //};
             //throw new HttpResponseException(message);
+        }
+
+        public string CONTEXT_USER
+        {
+            get { return User.Claims.First(x => x.Type == ClaimTypes.NameIdentifier).Value; }
+        }
+        public string CONTEXT_TOKEN
+        {
+            get { return HttpContext.Request.Headers["Authorization"][0].Remove(0, "Bearer ".Length); }
         }
     }
 }
