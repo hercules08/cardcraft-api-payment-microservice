@@ -51,6 +51,7 @@ namespace Cardcraft.Microservice.Payment.Controllers
         /// <returns></returns>
         [HttpPost]
         [Route("PurchaseCredits")]
+        [ValidateModelState]
         public async Task<IActionResult> PurchaseCredits([FromBody]PurchaseCreditRequest request)
         {
             BillingInfo billInfo =
