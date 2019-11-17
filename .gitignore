@@ -349,3 +349,4 @@ healthchecksdb
 
 appsettings.Debug.json
 appsettings.Staging.json
+.DS_STORE
