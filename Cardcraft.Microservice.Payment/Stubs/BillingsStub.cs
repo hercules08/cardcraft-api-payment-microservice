@@ -16,7 +16,8 @@ namespace Cardcraft.Microservice.Payment.Stubs
                 {
                     new BillingInfo { Id = 1, Cost = 3.99f, CreditCount = 1 },
                     new BillingInfo { Id = 2, Cost = 9.99f, CreditCount = 3 },
-                    new BillingInfo { Id = 3, Cost = 19.99f, CreditCount = 10 }
+                    new BillingInfo { Id = 3, Cost = 19.99f, CreditCount = 10 },
+                    new BillingInfo { Id = 4, Cost = 6.97f, CreditCount = 1}
                 };
             }
         }

@@ -39,7 +39,7 @@ namespace Cardcraft.Microservice.Payment.Controllers
         [HttpGet]
         [Route("GetBillingAmounts")]
         [AllowAnonymous]
-        public ActionResult GetBillingAmounts()
+        public ActionResult GetBillingtAmounts()
         {
             return Ok(BillingsStub.BillingAmounts);
         }
@@ -62,10 +62,10 @@ namespace Cardcraft.Microservice.Payment.Controllers
                 Amount = Convert.ToInt32(billInfo.Cost * 100),
                 Currency = "usd",
                 Description = "Cardcraft Purchase " + CONTEXT_USER,
-                SourceId = request.Token
+                Source = request.Token
             };
 
-            var service = new ChargeService("sk_test_yqhJJAmFkjInHP9tJL4gR6G3");
+            var service = new ChargeService(new StripeClient("sk_test_yqhJJAmFkjInHP9tJL4gR6G3"));
 
             Charge chargeResponse = null;
 
@@ -118,10 +118,10 @@ namespace Cardcraft.Microservice.Payment.Controllers
                 Amount = Convert.ToInt32(billInfo.Cost * 100),
                 Currency = "usd",
                 Description = "Cardcraft Purchase " + CONTEXT_USER,
-                SourceId = request.Token
+                Source = request.Token
             };
 
-            var service = new ChargeService(_configuration["StripeKey"]);
+            var service = new ChargeService(new StripeClient(_configuration["StripeKey"]));
 
             Charge chargeResponse = null;
 
