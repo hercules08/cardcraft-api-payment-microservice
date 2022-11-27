@@ -127,29 +127,45 @@ namespace Cardcraft.Microservice.Payment.Controllers
 
             try
             {
+
+                //TODO Read look into service.Create() what are possible responses?
+
                 chargeResponse = service.Create(charge);
 
-                IAPIResponse updateUserCreditResponse = await _accountClient.UpdateUserCredits(new UpdateUserCreditRequest()
+                if (chargeResponse != null && chargeResponse.Status == "success")
                 {
-                    UserProfileId = CONTEXT_USER,
-                    AccessToken = CONTEXT_TOKEN,
-                    NumOfCreditsToAdd = billInfo.CreditCount
-                });
+                    IAPIResponse updateUserCreditResponse = await _accountClient.UpdateUserCredits(new UpdateUserCreditRequest()
+                    {
+                        UserProfileId = CONTEXT_USER,
+                        AccessToken = CONTEXT_TOKEN,
+                        NumOfCreditsToAdd = billInfo.CreditCount
+                    });
 
-                if (updateUserCreditResponse.Success)
-                {
-                    APIResponse<UpdateUserCreditResponse> creditResponse = (APIResponse<UpdateUserCreditResponse>)updateUserCreditResponse;
-                    PurchaseCreditResponse purchaseCreditResponse = new PurchaseCreditResponse(true, "successful_purchase"
-                        , "Successfully added credits. Here are the total credits.", creditResponse.Data);
+                    if (updateUserCreditResponse.Success)
+                    {
+                        APIResponse<UpdateUserCreditResponse> creditResponse = (APIResponse<UpdateUserCreditResponse>)updateUserCreditResponse;
+                        PurchaseCreditResponse purchaseCreditResponse = new PurchaseCreditResponse(true, "successful_purchase"
+                            , "Successfully added credits. Here are the total credits.", creditResponse.Data);
 
-                    return Ok(purchaseCreditResponse);
+                        return Ok(purchaseCreditResponse);
+                    }
                 }
+                else if(chargeResponse != null && chargeResponse.Status == "failed")
+                {
+
+                }
+                else if (chargeResponse != null && chargeResponse.Status == "pending")
+                {
+
+                }
+
             }
             catch (StripeException ex)
             {
                 StripeError stripeError = ex.StripeError;
 
                 // Handle error
+                // Handle each specific Errop
                 return BadRequest(stripeError);
             }
 
